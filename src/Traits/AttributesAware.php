@@ -22,11 +22,25 @@ trait AttributesAware
      */
     private $attributes = [];
 
+    /**
+     * Property setter magic function.
+     *
+     * @param mixed $value
+     *
+     * @return void
+     */
     public function __set(string $name, $value)
     {
         Arr::set($this->attributes, $name, $value);
     }
 
+    /**
+     * Properties getter magic function.
+     *
+     * @param mixed $name
+     *
+     * @return mixed
+     */
     public function __get($name)
     {
         return Arr::get($this->attributes ?? [], $name, null);
@@ -86,7 +100,6 @@ trait AttributesAware
             yield $key => $value;
         }
     }
-
 
     /**
      * Merge attributes into internal attributes.

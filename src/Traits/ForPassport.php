@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User\Traits;
 
+use Drewlabs\Auth\User\Contracts\PassportProvider;
 use Drewlabs\Auth\User\DI;
-use Drewlabs\Auth\User\PassportProvider;
 
 trait ForPassport
 {

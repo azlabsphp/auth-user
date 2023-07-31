@@ -13,18 +13,18 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User\Traits;
 
+use Drewlabs\Auth\User\DI;
+use Drewlabs\Contracts\Auth\Authenticatable;
+use Drewlabs\Contracts\Auth\AuthorizationsAware;
 use Drewlabs\Contracts\OAuth\AccessTokenBridge;
 use Drewlabs\Contracts\OAuth\PersonalAccessToken;
 use Drewlabs\Contracts\OAuth\PersonalAccessTokenFactory;
 use Drewlabs\Contracts\OAuth\Token;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Auth\User\DI;
-use Drewlabs\Auth\User\Auth;
-use Drewlabs\Contracts\Auth\AuthorizationsAware;
-use Drewlabs\Contracts\Auth\Authenticatable;
 
 /**
  * @mixin Authenticatable
+ *
  * @property Token $accessToken
  */
 trait HasApiTokens
@@ -58,11 +58,9 @@ trait HasApiTokens
      *
      * @return PersonalAccessToken
      */
-    public function createToken($name, array $scopes = [])
+    public function createToken($name, array $scopes = ['*'])
     {
-        if (empty($scopes)) {
-            $scopes = $this instanceof AuthorizationsAware && Auth::usingAuthorizationsAsTokenAbility() ? Arr::filter($this->getAuthorizations()) : [];
-        }
+        $scopes = $scopes === ['*'] && $this instanceof AuthorizationsAware ? Arr::filter($this->getAuthorizations()) : $scopes;
 
         return DI::getInstance()->make(PersonalAccessTokenFactory::class)->make($this->authIdentifier(), $name, $scopes);
     }
@@ -88,6 +86,7 @@ trait HasApiTokens
          * @var AccessTokenBridge
          */
         $bridge = DI::getInstance()->make(AccessTokenBridge::class);
+
         $this->accessToken = $bridge ? $bridge->exchange($accessToken) : $accessToken;
 
         return $this;

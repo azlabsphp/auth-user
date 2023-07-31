@@ -11,10 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+use Drewlabs\Auth\User\Traits\AttributesAware;
 use Drewlabs\Contracts\OAuth\Token;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\ImmutableDateTime;
-use Drewlabs\Auth\User\Traits\AttributesAware;
 
 class AccessTokenStub implements Token
 {
@@ -42,9 +42,6 @@ class AccessTokenStub implements Token
     public function can($ability)
     {
         return false;
-        // $abilities = $this->abilities();
-        // return in_array('*', $abilities) ||
-        //     array_key_exists($ability, array_flip($abilities));
     }
 
     public function cant($ability)

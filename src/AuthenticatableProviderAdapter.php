@@ -1,7 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Auth\User;
 
+use Drewlabs\Auth\User\Contracts\PassportProvider;
 use Drewlabs\Contracts\Auth\Authenticatable;
 use Drewlabs\Contracts\Auth\AuthenticatableProvider;
 
@@ -13,8 +25,7 @@ class AuthenticatableProviderAdapter implements PassportProvider
     private $provider;
 
     /**
-     * Creates class instance
-     * @param AuthenticatableProvider $provider 
+     * Creates class instance.
      */
     public function __construct(AuthenticatableProvider $provider)
     {
@@ -28,6 +39,6 @@ class AuthenticatableProviderAdapter implements PassportProvider
 
     public function validatePasswordCredentials(Authenticatable $user, string $password): bool
     {
-        return boolval($this->provider->validateAuthSecret($user, $password));
+        return (bool) $this->provider->validateAuthSecret($user, $password);
     }
 }

@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User;
 
-use Drewlabs\Contracts\OAuth\HasAbilities;
-use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Auth\User\Traits\AttributesAware;
+use Drewlabs\Contracts\OAuth\HasAbilities;
+use Drewlabs\Contracts\OAuth\Token;
+use Drewlabs\Core\Helpers\Arr;
 
-class AccessToken implements HasAbilities
+class AccessToken implements HasAbilities, Token
 {
     use AttributesAware;
 
@@ -27,6 +28,11 @@ class AccessToken implements HasAbilities
     public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
+    }
+
+    public function revoke()
+    {
+        // TODO: Throw a BadMethodCallException as this access token does not revoke
     }
 
     public function transient()

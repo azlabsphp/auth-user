@@ -11,107 +11,123 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\Contracts\Auth\Authenticatable;
-use Drewlabs\Contracts\Auth\DoubleAuthUserInterface;
-use Drewlabs\Contracts\Auth\Notifiable;
-use Drewlabs\Contracts\Auth\Verifiable;
 use Drewlabs\Auth\User\Traits\AttributesAware;
 use Drewlabs\Auth\User\User;
+use Drewlabs\Contracts\Auth\AuthorizationsAware;
+use Drewlabs\Contracts\Auth\UserInterface;
+use Drewlabs\Contracts\Auth\Verifiable;
 
-class UserStub implements DoubleAuthUserInterface, Notifiable, Verifiable
+class UserStub implements UserInterface, Verifiable, AuthorizationsAware
 {
     use AttributesAware;
 
-    public function __construct(array $attributes)
+    /**
+     * Creates user class instance.
+     *
+     * @return void
+     */
+    public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
     }
 
-    public function getChannels()
+    public function isVerified()
     {
-        return $this->channels;
+        boolval($this->getAttribute('is_verified', true));
     }
 
-    public function getDoubleAuthActive()
+    public function getUserNameAttributeName(): string
     {
-        return $this->double_auth_active;
+        return 'username';
     }
 
-    public function updateDoubleAuthActive($value = false)
+    public function getPasswordAttributeName(): string
     {
-        $this->double_auth_active = $value;
+        return 'password';
     }
 
-    public function getUserById($id)
+    public function getRememberTokenAttributeName(): string
     {
-        return $this;
+        return 'remember_token';
     }
 
-    public function fetchUserByCredentials(array $credentials)
+    public function getIdentifierAttributeName(): string
     {
-        return $this;
+        return 'id';
     }
 
-    public function updateUserRememberToken($id, $token)
+    public function getLoginAttemptsAttributeName(): string
     {
+        return 'login_attempts';
     }
 
     public function getUserName()
     {
-        return $this->username;
+        return $this->getAttribute($this->getUserNameAttributeName());
     }
 
     public function getPassword()
     {
-        return $this->password;
+        return $this->getAttribute($this->getPasswordAttributeName());
     }
 
     public function getIsActive()
     {
-        $this->is_active;
+        return boolval($this->getAttribute('is_active', true));
     }
 
     public function getRememberToken()
     {
-        return $this->remember_token;
+        return $this->getAttribute($this->getRememberTokenAttributeName());
     }
 
     public function getIdentifier()
     {
-        return $this->id;
+        return $this->getAttribute($this->getIdentifierAttributeName());
+    }
+
+    public function getDoubleAuthActive()
+    {
+        return $this->getAttribute('double_auth_active', false);
+    }
+
+    public function setDoubleAuthActive($value = false)
+    {
+        return $this->setAttribute('double_auth_active', $value);
+    }
+
+    public function getLockedAttributeName(): string
+    {
+        return 'lock_enabled';
+    }
+
+    public function getLockExpiresAtAttributeName(): string
+    {
+        return 'lock_expires_at';
     }
 
     public function getLockEnabled()
     {
-        return false;
+        return $this->getAttribute('lock_enabled', false);
     }
 
     public function getLockExpireAt()
     {
-        return null;
+        return $this->getAttribute('lock_expires_at', null);
     }
 
     public function getLoginAttempts()
     {
-        return null;
+        return $this->getAttribute($this->getLoginAttemptsAttributeName());
     }
 
-    public function getUserDetails()
+    public function getAuthorizations(): array
     {
-        return $this->user_details;
+        return $this->getAttribute('authorizations', []);
     }
 
-    public function fromAuthenticatable(Authenticatable $authenticatable)
+    public function getAuthorizationGroups(): array
     {
-    }
-
-    public function toAuthenticatable(bool $loadRelations = true)
-    {
-        return User::createFromAttributes($this->attributes);
-    }
-
-    public function isVerified()
-    {
-        return $this->is_verified;
+        return $this->getAttribute('authorization_groups', []);
     }
 }

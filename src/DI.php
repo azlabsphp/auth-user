@@ -13,19 +13,27 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User;
 
+use Drewlabs\Auth\User\Exceptions\InjectionException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use RuntimeException;
 
 class DI
 {
+    /**
+     * @var static
+     */
     private static $instance;
 
     /**
      * @var ContainerInterface
      */
     private $container;
+
+    /**
+     * @var array<string,callable>
+     */
+    private $resolvers = [];
 
     /**
      * Private DI constructor.
@@ -51,6 +59,32 @@ class DI
     }
 
     /**
+     * Configure providers that might be used when abstracts are requested.
+     *
+     * @return void
+     */
+    public static function configure(array $providers)
+    {
+        foreach ($providers as $key => $provider) {
+            if (!\is_string($provider) && \is_callable($provider)) {
+                static::getInstance()->provide($key, $provider);
+            }
+        }
+    }
+
+    /**
+     * Add a creator function for a given abstraction.
+     *
+     * @return void
+     */
+    public function provide(string $abstract, callable $factory)
+    {
+        $this->resolvers[$abstract] = static function (self $injector) use ($factory) {
+            return \call_user_func_array($factory, [$injector]);
+        };
+    }
+
+    /**
      * Creates an instance from an abstraction declaration or.
      *
      * @param mixed $abstract
@@ -63,10 +97,21 @@ class DI
     public function make($abstract, array $parameters = [])
     {
         try {
-            return !\is_string($abstract) && \is_callable($abstract) ? \call_user_func_array($abstract, $parameters) : $this->getContainer()->get($abstract);
+            // First try to resolve dependency from DI resolvers
+            if (\array_key_exists($abstract, $this->resolvers)) {
+                return \call_user_func_array($this->resolvers[$abstract], [$this, ...$parameters]);
+            }
+
+            // Case the container is not set, we simply
+            if (null === ($container = $this->getContainer())) {
+                print_r(['abstract' => $abstract]);
+                throw new InjectionException('No container instance provided for the DI, use DI::setContainer() at the root of your application to set the container used by the library');
+            }
+
+            return $container->get($abstract);
         } catch (\Throwable $th) {
             // We return null if we were not able to locate factory from the container
-            return null;
+            throw new InjectionException($th->getMessage(), $th->getCode(), $th);
         }
     }
 
@@ -87,9 +132,6 @@ class DI
      */
     private function getContainer()
     {
-        if (null === $this->container) {
-            throw new RuntimeException('No container instance found');
-        }
         return $this->container;
     }
 }

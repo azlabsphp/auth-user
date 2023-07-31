@@ -13,25 +13,30 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User\Traits;
 
-use Drewlabs\Contracts\OAuth\HasApiTokens as HasApiTokensInterface;
+use Drewlabs\Auth\User\Contracts\AuthorizationGateInterface;
 use Drewlabs\Auth\User\DI;
+use Drewlabs\Contracts\OAuth\HasApiTokens as HasApiTokensInterface;
+use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Reflector;
-use Illuminate\Contracts\Auth\Access\Gate;
 
 /**
+ * @internal
+ *
+ * @mixin AttributesAware
+ *
  * @property string[] $authorizations
  * @property string[] $roles
  */
 trait Authorizable
 {
-    public function getAuthorizations()
+    public function getAuthorizations(): array
     {
         return $this->authorizations ?? [];
     }
 
-    public function getAuthorizationGroups()
+    public function getAuthorizationGroups(): array
     {
-        return $this->roles ?? [];
+        return $this->authorization_groups ?? [];
     }
 
     public function setAuthorizations(array $value = [])
@@ -43,9 +48,29 @@ trait Authorizable
 
     public function setAuthorizationGroups(array $value = [])
     {
-        $this->roles = $value;
+        $this->authorization_groups = $value;
 
         return $this;
+    }
+
+    /**
+     * Checks if the current is aware of a given acl authorization.
+     *
+     * @return void
+     */
+    public function hasAbility(string $ability)
+    {
+        return \in_array($ability, $this->getAuthorizations(), true);
+    }
+
+    /**
+     * Checks if the current is aware of all given acl authorizations.
+     *
+     * @return void
+     */
+    public function hasAbilities(array $abilities = [])
+    {
+        return Arr::containsAll($this->getAuthorizations() ?? [], $abilities);
     }
 
     /**
@@ -58,7 +83,7 @@ trait Authorizable
      */
     public function can($ability, $arguments = [])
     {
-        return DI::getInstance()->make(Gate::class)->forUser($this)->check($ability, $arguments);
+        return DI::getInstance()->make(AuthorizationGateInterface::class)->forUser($this)->check($ability, $arguments);
     }
 
     /**
