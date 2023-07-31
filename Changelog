@@ -1,0 +1,38 @@
+
+# Changelogs
+
+## 20220121200
+
+- Change package name
+- Remove dependency to [drewlabs/laravel-lumen-passport] and [laravel/passport] libraries
+
+
+## 202201212110
+
+- Added ForPassport trait
+- \Drewlabs\OAuthUser\User now implements \Drewlabs\Contracts\OAuth\HasApiTokens interface
+- Added getHidden and setHidden(array $value) methods to User model
+
+## 202201272114
+
+- Takes scope builder from identity package to this package
+- Added Helpers::dontUseAuthorizationAsTokenAbilities static method
+- Added Helpers::usingAuthorizationsAsTokenAbility static method
+
+
+## 202201272114
+
+- Bug fix in Authorizable trait for gate policies
+- Added hasAbility() and hasAllAbilities() methods to user to check if user have some authorizations
+
+## 202201272113
+
+- Add PHP81 #[\ReturnTypeWillChange] attribute to User:jsonSerialize() method
+
+## [2.2.14] 2022-05-29
+
+- Removes code that filters out sys admin authorizations
+
+## [2.3.0] 2022-05-29
+
+- Add support version of Laravel framework libraries

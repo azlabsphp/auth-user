@@ -1,0 +1,38 @@
+{
+    "name": "drewlabs/auth-user",
+    "description": "Auth component bindings for Laravel passport library",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Drewlabs\\Auth\\User\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ]
+    },
+    "authors": [
+        {
+            "name": "azandrew-sidoine",
+            "email": "asmyns.platonnas29@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.1|^8.0",
+        "drewlabs/collections": "^0.2.0",
+        "drewlabs/contracts": "^0.2.0",
+        "drewlabs/core-helpers": "^0.2.0",
+        "illuminate/contracts": "^7.0|^8.0|^9.0|^10.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
