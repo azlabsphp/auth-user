@@ -1,6 +1,6 @@
 {
     "name": "drewlabs/auth-user",
-    "description": "Auth component bindings for Laravel passport library",
+    "description": "User component for drewlabs/auth library implementation",
     "type": "library",
     "license": "MIT",
     "autoload": {
