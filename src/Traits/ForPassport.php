@@ -14,10 +14,20 @@ declare(strict_types=1);
 namespace Drewlabs\Auth\User\Traits;
 
 use Drewlabs\Auth\User\Contracts\PassportProvider;
-use Drewlabs\Auth\User\DI;
+use Drewlabs\Contracts\Auth\Authenticatable;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
+/**
+ * @mixin Authenticatable
+ */
 trait ForPassport
 {
+    /**
+     * @var PassportProvider
+     */
+    private $passportProvider;
+
     /**
      * Find the user instance for the given username.
      *
@@ -25,7 +35,7 @@ trait ForPassport
      */
     public function findForPassport($username)
     {
-        return DI::getInstance()->make(PassportProvider::class)->findByLogin($username);
+        return $this->getForPassport()->findByLogin($username);
     }
 
     /**
@@ -37,6 +47,31 @@ trait ForPassport
      */
     public function validateForPassportPasswordGrant($password)
     {
-        return DI::getInstance()->make(PassportProvider::class)->validatePasswordCredentials($password);
+        return $this->getForPassport()->validatePasswordCredentials($this, $password);
+    }
+
+    /**
+     * Set passport provider instance.
+     *
+     * @return static
+     */
+    public function setForPassport(PassportProvider $passport)
+    {
+        $this->passportProvider = $passport;
+
+        return $this;
+    }
+
+    /**
+     * Get passport provider instance.
+     *
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     *
+     * @return PassportProvider
+     */
+    public function getForPassport()
+    {
+        return $this->passportProvider;
     }
 }

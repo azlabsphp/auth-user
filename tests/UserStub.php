@@ -33,7 +33,7 @@ class UserStub implements UserInterface, Verifiable, AuthorizationsAware
 
     public function isVerified()
     {
-        boolval($this->getAttribute('is_verified', true));
+        (bool) $this->getAttribute('is_verified', true);
     }
 
     public function getUserNameAttributeName(): string
@@ -73,7 +73,7 @@ class UserStub implements UserInterface, Verifiable, AuthorizationsAware
 
     public function getIsActive()
     {
-        return boolval($this->getAttribute('is_active', true));
+        return (bool) $this->getAttribute('is_active', true);
     }
 
     public function getRememberToken()

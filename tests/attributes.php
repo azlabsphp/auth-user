@@ -17,7 +17,7 @@ return [
     'is_active' => true,
     'remember_token' => null,
     'double_auth_active' => false,
-    'roles' => ['SYSADMIN'],
+    'authorization_groups' => ['SYSADMIN'],
     'authorizations' => [
         'all',
         'list-authorizations',

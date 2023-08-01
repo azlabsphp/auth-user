@@ -14,10 +14,11 @@ declare(strict_types=1);
 namespace Drewlabs\Auth\User\Traits;
 
 use Drewlabs\Auth\User\Contracts\AuthorizationGateInterface;
-use Drewlabs\Auth\User\DI;
 use Drewlabs\Contracts\OAuth\HasApiTokens as HasApiTokensInterface;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Reflector;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * @internal
@@ -25,10 +26,15 @@ use Drewlabs\Core\Helpers\Reflector;
  * @mixin AttributesAware
  *
  * @property string[] $authorizations
- * @property string[] $roles
+ * @property string[] $authorization_groups
  */
 trait Authorizable
 {
+    /**
+     * @var AuthorizationGateInterface
+     */
+    private $gate;
+
     public function getAuthorizations(): array
     {
         return $this->authorizations ?? [];
@@ -83,7 +89,7 @@ trait Authorizable
      */
     public function can($ability, $arguments = [])
     {
-        return DI::getInstance()->make(AuthorizationGateInterface::class)->forUser($this)->check($ability, $arguments);
+        return $this->getGate()->forUser($this)->check($ability, $arguments);
     }
 
     /**
@@ -116,5 +122,25 @@ trait Authorizable
     {
         return (($this instanceof HasApiTokensInterface) && \is_object($this->currentAccessToken()))
             || (\in_array(HasApiTokens::class, Reflector::usesRecursive(static::class) ?? [], true) && \is_object($this->currentAccessToken()));
+    }
+
+    public function setGate(AuthorizationGateInterface $gate)
+    {
+        $this->gate = $gate;
+
+        return $this;
+    }
+
+    /**
+     * Returns the gate instance property value.
+     *
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     *
+     * @return AuthorizationGateInterface
+     */
+    public function getGate()
+    {
+        return $this->gate;
     }
 }

@@ -16,23 +16,36 @@ namespace Drewlabs\Auth\User;
 use Drewlabs\Auth\User\Traits\AttributesAware;
 use Drewlabs\Contracts\OAuth\HasAbilities;
 use Drewlabs\Contracts\OAuth\Token;
-use Drewlabs\Core\Helpers\Arr;
 
+/**
+ * Trasient access token 
+ * @package Drewlabs\Auth\User
+ */
 class AccessToken implements HasAbilities, Token
 {
     use AttributesAware;
 
     /**
+     * @var array<callable>
+     */
+    private $revokeTokenListeners = [];
+
+    /**
      * Creates access token class.
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $attributes = [], callable $revokeHandler = null)
     {
         $this->attributes = $attributes;
+        if ($revokeHandler) {
+            $this->addRevokeTokenLister($revokeHandler);
+        }
     }
 
     public function revoke()
     {
-        // TODO: Throw a BadMethodCallException as this access token does not revoke
+        foreach ($this->revokeTokenListeners ?? [] as $listener) {
+            call_user_func_array($listener, [$this]);
+        }
     }
 
     public function transient()
@@ -59,6 +72,28 @@ class AccessToken implements HasAbilities, Token
 
     public function setAccessToken($value)
     {
-        Arr::set($this->attributes, 'authToken', $value);
+        $this->setAttribute('authToken', $value);
+    }
+
+    /**
+     * Add a revoke token listener for revoke token event
+     * 
+     * @param callable $callback
+     * 
+     * @return void 
+     */
+    public function addRevokeTokenLister(callable $callback)
+    {
+        $this->revokeTokenListeners[] = $callback;
+    }
+
+    /**
+     * Returns the access token string value
+     * 
+     * @return string 
+     */
+    public function getAccessToken()
+    {
+        return $this->getAttribute('authToken', null);
     }
 }

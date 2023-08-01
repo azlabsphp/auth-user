@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Auth\User\Traits;
 
-use Drewlabs\Auth\User\DI;
 use Drewlabs\Contracts\Auth\Authenticatable;
 use Drewlabs\Contracts\Auth\AuthorizationsAware;
 use Drewlabs\Contracts\OAuth\AccessTokenBridge;
@@ -21,6 +20,8 @@ use Drewlabs\Contracts\OAuth\PersonalAccessToken;
 use Drewlabs\Contracts\OAuth\PersonalAccessTokenFactory;
 use Drewlabs\Contracts\OAuth\Token;
 use Drewlabs\Core\Helpers\Arr;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * @mixin Authenticatable
@@ -29,6 +30,13 @@ use Drewlabs\Core\Helpers\Arr;
  */
 trait HasApiTokens
 {
+    private $accessTokenFactory;
+
+    /**
+     * @var AccessTokenBridge
+     */
+    private $accessTokenBridge;
+
     /**
      * Get the current access token being used by the user.
      *
@@ -62,7 +70,7 @@ trait HasApiTokens
     {
         $scopes = $scopes === ['*'] && $this instanceof AuthorizationsAware ? Arr::filter($this->getAuthorizations()) : $scopes;
 
-        return DI::getInstance()->make(PersonalAccessTokenFactory::class)->make($this->authIdentifier(), $name, $scopes);
+        return $this->getAccessTokenFactory()->make($this->authIdentifier(), $name, $scopes);
     }
 
     /**
@@ -82,12 +90,8 @@ trait HasApiTokens
 
             return $this;
         }
-        /**
-         * @var AccessTokenBridge
-         */
-        $bridge = DI::getInstance()->make(AccessTokenBridge::class);
 
-        $this->accessToken = $bridge ? $bridge->exchange($accessToken) : $accessToken;
+        $this->accessToken = ($bridge = $this->getAccessTokenBridge()) ? $bridge->exchange($accessToken) : $accessToken;
 
         return $this;
     }
@@ -95,6 +99,56 @@ trait HasApiTokens
     public function currentAccessToken()
     {
         return $this->accessToken;
+    }
+
+    /**
+     * Set access token bridge for the current instance.
+     *
+     * @return static
+     */
+    public function setAccessTokenBridge(AccessTokenBridge $bridge)
+    {
+        $this->accessTokenBridge = $bridge;
+
+        return $this;
+    }
+
+    /**
+     * Returns access token bridge for the current instance.
+     *
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     *
+     * @return AccessTokenBridge
+     */
+    public function getAccessTokenBridge()
+    {
+        return $this->accessTokenBridge;
+    }
+
+    /**
+     * Set access token factory for the current instance.
+     *
+     * @return static
+     */
+    public function setAccessTokenFactory(PersonalAccessTokenFactory $factory)
+    {
+        $this->accessTokenFactory = $factory;
+
+        return $this;
+    }
+
+    /**
+     * Returns access token factory for the current instance.
+     *
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     *
+     * @return PersonalAccessTokenFactory
+     */
+    public function getAccessTokenFactory()
+    {
+        return $this->accessTokenFactory;
     }
 
     private function accessTokenCan($scope)

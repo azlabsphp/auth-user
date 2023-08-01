@@ -47,7 +47,7 @@ class User implements Authenticatable, AbstractAuthenticatable, AuthorizationsAw
             $this->attributes[$key] = $value;
         }
 
-        $accessToken = is_array($token = $attributes['accessToken'] ?? null) ? new AccessToken($token) : (is_object($token) ? $token : new AccessToken);
+        $accessToken = \is_array($token = $attributes['accessToken'] ?? null) ? new AccessToken($token) : (\is_object($token) ? $token : new AccessToken());
         $this->withAccessToken($accessToken);
     }
 }

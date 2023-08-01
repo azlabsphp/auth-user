@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 use Drewlabs\Auth\User\User;
 use Drewlabs\Contracts\Auth\Authenticatable;
+use Drewlabs\Contracts\Auth\AuthorizationsAware;
 use Drewlabs\Contracts\OAuth\HasApiTokens;
 use Illuminate\Contracts\Auth\Authenticatable as AuthAuthenticatable;
 use PHPUnit\Framework\TestCase;
-use Drewlabs\Contracts\Auth\AuthorizationsAware;
 
 class AuthenticatableTest extends TestCase
 {
@@ -76,20 +76,5 @@ class AuthenticatableTest extends TestCase
         $accessToken = AccessTokenStub::createFromAttributes($this->attributes['accessToken']);
         $auth->withAccessToken($accessToken);
         $this->assertFalse($auth->tokenCan('list-authorizations'));
-    }
-
-    public function test_Authenticatable_From_AuthModel()
-    {
-        $auth = User::fromAuthModel(UserStub::createFromAttributes($this->attributes));
-        $this->assertInstanceOf(User::class, $auth);
-        $this->assertInstanceOf(Authenticatable::class, $auth);
-        $this->assertInstanceOf(AuthAuthenticatable::class, $auth);
-        $this->assertInstanceOf(AuthorizationsAware::class, $auth);
-        $this->assertIsArray($auth->getAuthorizations());
-        $this->assertTrue(in_array('list-authorizations', $auth->getAuthorizations(), true));
-        $this->assertIsArray($auth->getAuthorizationGroups());
-        $this->assertSame('APPSYSADMIN', $auth->getAuthUserName());
-        $this->assertSame(1, (int) $auth->authIdentifier());
-        $this->assertSame(1, (int) $auth->getAuthIdentifier());
     }
 }
