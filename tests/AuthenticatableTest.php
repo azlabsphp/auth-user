@@ -77,4 +77,11 @@ class AuthenticatableTest extends TestCase
         $auth->withAccessToken($accessToken);
         $this->assertFalse($auth->tokenCan('list-authorizations'));
     }
+
+
+    public function test_illuminate_authenticatable_getAuthPasswordName_method_return_password()
+    {
+        $auth = User::createFromAttributes($this->attributes);
+        $this->assertEquals('password', $auth->getAuthPasswordName());
+    }
 }
